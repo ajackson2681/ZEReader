@@ -10,10 +10,10 @@
 / {
 
   chosen {
-    zephyr,display = &uc8179_waveshare_epaper_gdew075t7;
+    zephyr,display = &uc8176_display;
   };
 
-  mipi_dbi_waveshare_epaper_gdew075t7 {
+  mipi_dbi_waveshare_epaper_uc8176 {
     compatible = "zephyr,mipi-dbi-spi";
     spi-dev = <&spi0>; //spi@0 -> GPIO 16-19
     dc-gpios = <&gpio0 20 GPIO_ACTIVE_HIGH>;
@@ -22,28 +22,13 @@
     #address-cells = <1>;
     #size-cells = <0>;
 
-    uc8179_waveshare_epaper_gdew075t7: uc8179@0 {
-      compatible = "gooddisplay,gdew075t7", "ultrachip,uc8179";
+    uc8176_display: uc8176@0 {
+      compatible = "ultrachip,uc8176";
       mipi-max-frequency = <4000000>;
       reg = <0>;
-      width = <800>;
-      height = <480>;
+      width = <400>;
+      height = <300>;
       busy-gpios = <&gpio0 22 GPIO_ACTIVE_LOW>;
-
-      softstart = [ 17 17 17  ];
-
-      full {
-        pwr = [ 07 07 3f 3f  ];
-        cdi = <0x07>;
-        tcon = <0x22>;
-      };
-
-      partial {
-        pwr = [ 03 02 2b 2b ];
-				cdi = <0x07>;
-				pll = <0x3c>;
-				vdcs = <0x08>;
-      };
     };
   };
 
@@ -75,6 +60,10 @@
     input = <&keys>;
     input-codes = <INPUT_KEY_0 INPUT_KEY_1 INPUT_KEY_2 INPUT_KEY_3>;
     coordinates = <10 470>, <400 470>, <780 470>, <15 470>;
+  };
+
+  zephyr_user: zephyr,user {
+    io-channels = <&adc 3>;  /* GPIO29 = ADC3 = VSYS/3 on Pico */
   };
 };
 
@@ -119,4 +108,18 @@
 
 &i2c1 {
   status = "disabled";
+};
+
+&adc {
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    channel@3 {
+        reg = <3>;
+        zephyr,gain = "ADC_GAIN_1";
+        zephyr,reference = "ADC_REF_INTERNAL";
+        zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+        zephyr,resolution = <12>;
+    };
 };
